@@ -25,7 +25,7 @@ export async function signUp(req, res) {
     }
 }
 
-export async function getUser(req, res) {
+export async function signIn(req, res) {
     const { email, password } = req.body
 
     try {
@@ -43,8 +43,7 @@ export async function getUser(req, res) {
 
             return res.status(200).send(token);
         } else {
-            res.sendStatus(401).send("Usuário ou senha incorretos");
-            return;
+            return res.sendStatus(401).send("Usuárioimage.png ou senha incorretos");
         }
 
     } catch (error) {
