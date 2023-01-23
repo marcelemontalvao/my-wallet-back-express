@@ -20,7 +20,7 @@ const userSchema = joi.object({
 const transactionSchema = joi.object({
     value: joi.number().required(),
     description: joi.string().required(),
-    type: joi.string().required()
+    type: joi.string().required().valid('input', 'output')
 });
 
 app.post('/user', async (req, res) => {
@@ -60,31 +60,34 @@ app.post('/user', async (req, res) => {
 app.get("/user", async (req, res) => {
     const { email, password } = req.body
     try {
-        const user = await db.collection("users").findOne({
-            email: email,
-            password: password
-        })
+        const user = await db.collection("users").findOne({ email })
 
-        const token = uuidV4();
-            
-        await db.collection("sessions").insertOne({
-            userId: user._id,
-            token
-        })
+        if (user && bcrypt.compareSync(password, user.password)) {
 
-        res.status(200).send(token)
+            const token = uuidV4();
+
+            await db.collection("sessions").insertOne({
+                userId: user._id,
+                token
+            })
+
+            return res.status(200).send(token);
+        } else {
+           return res.sendStatus(401);
+        }
+  
     } catch (error) {
-        res.status(500).send(error.message);
+        return res.status(500).send(error.message);
     }
 });
 
-app.post('/transactions/input', async (req, res) => {
-    const { value, description } = req.body
+app.post('/transactions', async (req, res) => {
+    const { value, description, type } = req.body
 
     const transaction = {
         value: value,
         description: description,
-        type: "input"
+        type: type
     }
 
     const validation = transactionSchema.validate(transaction, { abortEarly: true })
@@ -101,39 +104,14 @@ app.post('/transactions/input', async (req, res) => {
     }
 });
 
-app.post('/transactions/output', async (req, res) => {
-    const { value, description } = req.body
-
-    const transaction = {
-        value: value,
-        description: description,
-        type: "output"
-    }
-
-    const validation = transactionSchema.validate(transaction, { abortEarly: true })
-    if (validation.error) {
-        const errors = validation.error.details.map((detail) => detail.message);
-        return res.status(422).send(errors)
-    }
-
+app.get("/transactions", async (req, res) => {
     try {
-        await db.collection("transactions").insertOne({ transaction })
-        return res.sendStatus(201);
+        const transactions = await db.collection("transactions").find().toArray()
+        res.status(200).send(transactions); // array de transações
     } catch (error) {
-        return res.status(500).send(error.message);
-    }
-});
-
-app.get("/transactions", (req, res) => {
-    db.collection("transactions").find().toArray().then(transactions => {
-        console.log(transactions); // array de transações
-    }).then(transactions => {
-        console.log(transactions);
-        res.status(200).send(transactions);
-    }).catch((error) => {
         console.error(error)
         res.status(404).send('Ops! Não foram encontradas transações!');
-    });
+    }
 });
 
 app.listen(PORT, () => {
