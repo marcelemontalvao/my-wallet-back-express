@@ -19,7 +19,7 @@ export async function signUp(req, res) {
                 password: passwordHash
             })
         }
-        return res.sendStatus(201).send("Usuário cadastrado com sucesso!");
+        return res.status(201).send("Usuário cadastrado com sucesso!");
     } catch (error) {
         return res.status(500).send(error.message);
     }
