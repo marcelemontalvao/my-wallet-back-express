@@ -1,27 +1,16 @@
 import express from "express";
 import cors from "cors"
-import db from "./db/db.js";
-import joi from 'joi'
+import db from "./config/database.js";
 import { v4 as uuidV4 } from 'uuid';
 import bcrypt from "bcrypt"
+import { userSchema } from "./schema/AuthSchema.js";
+import { transactionSchema } from "./schema/TransationsSchema.js";
 
 const app = express() // Cria um servidor
 const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
-
-const userSchema = joi.object({
-    name: joi.string().required(),
-    email: joi.string().email().required(),
-    password: joi.string().required()
-});
-
-const transactionSchema = joi.object({
-    value: joi.number().required(),
-    description: joi.string().required(),
-    type: joi.string().required().valid('input', 'output')
-});
 
 app.post('/user', async (req, res) => {
     const { name, email, password } = req.body
