@@ -10,8 +10,8 @@ export async function signUp(req, res) {
     try {
         const resp = await db.collection("users").findOne({ email })
 
-        if (resp && bcrypt.compareSync(password, resp.password)) {        
-            res.status(422).send("Usuário já existe");
+        if (resp && bcrypt.compareSync(password, resp.password)) {
+            return res.status(422).send("Usuário já existe");
         } else {
             await db.collection("users").insertOne({
                 name,
@@ -43,9 +43,10 @@ export async function getUser(req, res) {
 
             return res.status(200).send(token);
         } else {
-           return res.sendStatus(401).send("Usuário ou senha incorretos");
+            res.sendStatus(401).send("Usuário ou senha incorretos");
+            return;
         }
-  
+
     } catch (error) {
         return res.status(500).send(error.message);
     }

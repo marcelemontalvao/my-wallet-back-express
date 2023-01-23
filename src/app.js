@@ -11,9 +11,7 @@ app.use(express.json());
 
 app.use(cors());
 
-const router = express.Router();
-router.use(authRouter);
-router.use(transactionRouter);
+app.use([authRouter, transactionRouter]);
 
 app.listen(PORT, () => {
     console.log("Servidou rodou com sucesso")
