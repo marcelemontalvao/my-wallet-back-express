@@ -1,7 +1,9 @@
 import express from "express";
 import cors from "cors"
-import db from "./db/db";
+import db from "./db/db.js";
 import joi from 'joi'
+import { v4 as uuidV4 } from 'uuid';
+import bcrypt from "bcrypt"
 
 const app = express() // Cria um servidor
 const PORT = 5000;
@@ -28,7 +30,7 @@ app.post('/user', async (req, res) => {
     const user = {
         name: name,
         email: email,
-        password: passwordHash
+        password: password
     }
 
     const validation = userSchema.validate(user, { abortEarly: true })
@@ -40,7 +42,7 @@ app.post('/user', async (req, res) => {
     try {
         const resp = await db.collection("users").findOne({ email })
 
-        if (resp && bcrypt.compareSync(password, resp.password)) {
+        if (resp && bcrypt.compareSync(password, resp.password)) {        
             res.status(422).send("Usuário já existe");
         } else {
             await db.collection("users").insertOne({
@@ -58,11 +60,19 @@ app.post('/user', async (req, res) => {
 app.get("/user", async (req, res) => {
     const { email, password } = req.body
     try {
-        await db.collection("users").findOne({
+        const user = await db.collection("users").findOne({
             email: email,
             password: password
         })
-        res.status(200).send(user)
+
+        const token = uuidV4();
+            
+        await db.collection("sessions").insertOne({
+            userId: user._id,
+            token
+        })
+
+        res.status(200).send(token)
     } catch (error) {
         res.status(500).send(error.message);
     }
