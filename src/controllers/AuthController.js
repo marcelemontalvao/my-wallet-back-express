@@ -43,7 +43,7 @@ export async function signIn(req, res) {
 
             return res.status(200).send(token);
         } else {
-            return res.sendStatus(401).send("Usuárioimage.png ou senha incorretos");
+            return res.status(401).send("Usuário ou senha incorretos");
         }
 
     } catch (error) {
