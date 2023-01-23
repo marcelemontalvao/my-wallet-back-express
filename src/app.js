@@ -1,21 +1,19 @@
 import express from "express";
 import cors from "cors"
-import { getUser, signUp } from "./controllers/AuthController.js";
-import { getTransactions, postTransaction } from "./controllers/TransationsController.js";
+import authRouter from "./routes/AuthRouter.js"; 
+import transactionRouter from "./routes/TransactionsRouter.js";
 
-const app = express() // Cria um servidor
 const PORT = 5000;
 
-app.use(cors());
+const app = express();
+
 app.use(express.json());
 
-app.post('/user', signUp)
+app.use(cors());
 
-app.get("/user", getUser);
-
-app.post('/transactions', postTransaction);
-
-app.get("/transactions", getTransactions);
+const router = express.Router();
+router.use(authRouter);
+router.use(transactionRouter);
 
 app.listen(PORT, () => {
     console.log("Servidou rodou com sucesso")
