@@ -41,7 +41,7 @@ export async function signIn(req, res) {
                 token
             })
 
-            return res.status(200).send(token);
+            return res.status(200).send({token});
         } else {
             return res.status(401).send("Usuário ou senha incorretos");
         }
