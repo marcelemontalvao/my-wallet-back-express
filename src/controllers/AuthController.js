@@ -33,18 +33,11 @@ export async function signIn(req, res) {
         if (user && bcrypt.compareSync(password, user.password)) {
 
             const token = uuidV4();
-            console.log(
-                {
-                    userId: user._id,
-                    token
-                }
-            )
-            console.log(
-                await db.collection("sessions").insertOne({
-                    userId: user._id,
-                    token
-                })
-            ) 
+           
+            await db.collection("sessions").insertOne({
+                userId: user._id,
+                token
+            })
 
             res.locals.token = token;
 
